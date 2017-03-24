@@ -1,5 +1,5 @@
 import { FormatUtility } from './format-utility';
-import { IReadOnlyService } from './interfaces/read-only-service';
+import { IReadOnlyService } from './interfaces/services';
 import { MittagService } from './mittag-service';
 import { Menu, MittagApiResult } from './interfaces/mittag-api-result';
 var Botkit = require("botkit");

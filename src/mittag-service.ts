@@ -1,14 +1,15 @@
-import { IReadOnlyService } from './interfaces/read-only-service';
+import { IMittagService, IReadOnlyService } from './interfaces/services';
 import {Menu, MittagApiResult} from './interfaces/mittag-api-result';
 import * as Promise from "promise";
 import { FormatUtility } from './format-utility';
 import * as http from 'http';
  
-export class MittagService implements IReadOnlyService<Menu> {
+export class MittagService implements IMittagService<Menu> {
 
     private cachedResult: MittagApiResult;
     private lastFetched: Date;
     private formatter: FormatUtility;
+
     private defaultRestaurants: Array<number> = [
         371091, // horst
         11154,  // Eiserne Hand
@@ -62,23 +63,6 @@ export class MittagService implements IReadOnlyService<Menu> {
             });
         });
     }
-
-    // public fetchNearestRestaurants() : Promise<Array<string>> {
-    //     if (this.menuCached()) {
-    //         return new Promise((resolve, reject) => {
-    //             resolve(this.cachedResult.menus.filter(x => {
-    //                 return x.distance < 2;
-    //             }))
-    //         });
-    //     } else {
-    //     this.fetchAll().then(x => {
-    //         return new Promise((resolve, reject) => {
-    //             resolve(x => x.menus.filter(y => {return y.distance < 2}));
-    //         });
-    //     });
-    //     }
-    // }
-
 
     public get Result() : MittagApiResult {
         if (this.cachedResult && this.formatter.FormatDate(this.lastFetched) == this.formatter.FormatDate(new Date())) {
