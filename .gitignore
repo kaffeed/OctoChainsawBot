@@ -1,5 +1,6 @@
 node_modules/
-build/*
+build/
+bot_data/
 tests/cases/rwc/*
 tests/cases/test262/*
 tests/cases/perf/*
@@ -50,6 +51,7 @@ coverage/
 internal/
 **/.DS_Store
 .settings
+startBot.sh
 **/.vs
 **/.vscode
 !**/.vscode/tasks.json
