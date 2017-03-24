@@ -5,7 +5,7 @@ OctoChainsaw is a helper bot built on [botkit] (https://github.com/howdyai/botki
 In order to start OctoChainsaw, simply clone it and install it's dependencies via 
 `npm install`
 
-Afterwards, start the bot by running 
+Afterwards, compile the bot via `tsc` start the bot by running 
 
 `slackClientId=<yourSlackClientId> slackClientSecret=<yourSlackClientSecret> port=<port> mittagApiToken=<mittagApiToken> node build/index.js`
 
