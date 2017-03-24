@@ -11,7 +11,7 @@ if (!process.env.slackClientSecret) {
     process.exit(1);
 }
 
-if (!process.env.mittagtoken) {
+if (!process.env.mittagApiToken) {
     console.log("Error, no mittag-api token specified!");
     process.exit(1);
 }
@@ -23,4 +23,4 @@ if (!process.env.port) {
 
 console.log("Starting OctoChainsawBot...")
 
-var bot = new OctoChainsawBot(process.env.slackClientId, process.env.slackClientSecret, process.env.port, process.env.mittagtoken);
+var bot = new OctoChainsawBot(process.env.slackClientId, process.env.slackClientSecret, process.env.port, process.env.mittagApiToken);
