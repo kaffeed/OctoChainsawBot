@@ -1,6 +1,4 @@
-import { Menu, Restaurant } from './mittag-service';
-
-
+import { Restaurant, Menu } from './interfaces/mittag-api-result';
 
 export class FormatUtility {
     public FormatMenus(menus: Array<Menu>) : string {
@@ -32,5 +30,4 @@ export class FormatUtility {
 
         return  yyyy + "-" + mm + "-" +dd;
     }
-    
 }

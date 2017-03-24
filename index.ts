@@ -1,5 +1,5 @@
 import { MittagService } from './src/mittag-service';
-import { JamesBot } from './src/james-bot';
+import { OctoChainsawBot } from './src/octo-chainsaw-bot';
 
 if (!process.env.slackClientId) {
     console.log("Error, no clientId specified!");
@@ -21,6 +21,6 @@ if (!process.env.port) {
     process.exit(1);
 }
 
-console.log("Starting James...")
+console.log("Starting OctoChainsawBot...")
 
-var bot = new JamesBot(process.env.slackClientId, process.env.slackClientSecret, process.env.port, process.env.mittagtoken);
+var bot = new OctoChainsawBot(process.env.slackClientId, process.env.slackClientSecret, process.env.port, process.env.mittagtoken);
