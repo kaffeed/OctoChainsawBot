@@ -1,5 +1,7 @@
 # OctoChainsaw
 
+![Octo Chainsaw Logo](img/a_o_c.gif)
+
 OctoChainsaw is a helper bot built on [botkit] (https://github.com/howdyai/botkit) for slack, built in typescript.
 
 In order to start OctoChainsaw, simply clone it and install it's dependencies via 
