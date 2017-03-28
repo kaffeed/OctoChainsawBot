@@ -113,7 +113,7 @@ export class OctoChainsawBot {
     }
 
     private initDefaultBehavior() {
-        this._controller.hears("menus", "direct_message,direct_mention", (bot, message) => {
+        this._controller.hears(["menus", "menu", "essen", "hunger"], "direct_message,direct_mention", (bot, message) => {
             var reply = {
                 text: "Here are the menus for the default restaurants for " + new FormatUtility().FormatDate(new Date()),
                 attachments: []

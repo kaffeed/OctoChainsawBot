@@ -9,6 +9,7 @@ test-args.txt
 ~*.docx
 \#*\#
 .\#*
+startBot.ps1
 tests/baselines/local/*
 tests/baselines/local.old/*
 tests/services/baselines/local/*
