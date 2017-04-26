@@ -5,6 +5,17 @@ import { Menu, MittagApiResult } from './interfaces/mittag-api-result';
 var Botkit = require("botkit");
 var fs = require('fs');
 
+var startRTM = function(bot) {
+    bot.startRTM(function(err,bot,payload) {
+        if (err) {
+            console.log('*** Failed to start RTM')
+            return setTimeout(() => startRTM(bot), 60000);
+        }
+        console.log("*** RTM started!");
+    });
+}
+
+
 export class OctoChainsawBot {
     private _controller: any;
     private _mittagService: MittagService;
@@ -36,17 +47,6 @@ export class OctoChainsawBot {
         this.initDefaultBehavior();
     }
 
-    private startRTM (bot) {
-        bot.startRTM(function(err,bot,payload) {
-            if (err) {
-                console.log('*** Failed to start RTM')
-                
-                return setTimeout(() => this.startRTM(bot), 60000);
-            }
-            console.log("*** RTM started!");
-        });
-    }
-
     private initControllers(port) {
          this._controller.setupWebserver(port, (err,webserver)=> {
             this._controller.createWebhookEndpoints(this._controller.webserver);
@@ -66,7 +66,7 @@ export class OctoChainsawBot {
             if (this._bots[bot.config.token]) {
                 //do nothing
             } else {
-                this.startRTM(bot);
+                startRTM(bot);
             }
         });
 
@@ -77,7 +77,7 @@ export class OctoChainsawBot {
         this._controller.on("rtm_close", (bot) => {
             console.log("*** RTM api disconnected!");
             console.log("*** Trying to reconnect bot!");
-            this.startRTM(bot);
+            startRTM(bot);
         });
 
         this._controller.on(["direct_message","mention","direct_mention"], (bot,message) => {
