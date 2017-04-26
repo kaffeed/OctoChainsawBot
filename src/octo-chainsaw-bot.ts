@@ -18,7 +18,7 @@ export class OctoChainsawBot {
 
     constructor(slackClientId: string, slackClientSecret: string, port: string, mittagApiKey: string) {
         this._controller = Botkit.slackbot({
-            debug: true,
+            debug: false,
             json_file_store: './bot_data/',
             interactive_replies: true
         });

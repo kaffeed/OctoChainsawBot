@@ -14,7 +14,6 @@
   "author": "Sebastian Schubert",
   "license": "MIT",
   "dependencies": {
-    "@types/es6-promise": "0.0.32",
     "botkit": "^0.5.2",
     "fs": "0.0.1-security",
     "jquery": "^3.2.1",
@@ -23,7 +22,7 @@
     "typings": "^2.1.0"
   },
   "devDependencies": {
-    "@types/node": "^7.0.10",
+    "@types/node": "^7.0.12",
     "nodemon": "^1.11.0",
     "ts-node": "^3.0.2"
   }
