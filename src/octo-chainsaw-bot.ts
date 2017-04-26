@@ -36,6 +36,17 @@ export class OctoChainsawBot {
         this.initDefaultBehavior();
     }
 
+    private startRTM (bot) {
+        bot.startRTM(function(err,bot,payload) {
+            if (err) {
+                console.log('*** Failed to start RTM')
+                
+                return setTimeout(() => this.startRTM(bot), 60000);
+            }
+            console.log("*** RTM started!");
+        });
+    }
+
     private initControllers(port) {
          this._controller.setupWebserver(port, (err,webserver)=> {
             this._controller.createWebhookEndpoints(this._controller.webserver);
@@ -55,20 +66,7 @@ export class OctoChainsawBot {
             if (this._bots[bot.config.token]) {
                 //do nothing
             } else {
-                bot.startRTM((err) => {
-                    if (!err) {
-                        this.trackBot(bot);
-                    }
-
-                    bot.startPrivateConversation({user: config.createdBy}, (err,convo) => {
-                        if (err) {
-                            console.log(err);
-                        } else {
-                            convo.say('I am a bot that has just joined your team');
-                            convo.say('You must now /invite me to a channel so that I can be of use!');
-                        }
-                    });
-                });
+                this.startRTM(bot);
             }
         });
 
@@ -78,6 +76,8 @@ export class OctoChainsawBot {
 
         this._controller.on("rtm_close", (bot) => {
             console.log("*** RTM api disconnected!");
+            console.log("*** Trying to reconnect bot!");
+            this.startRTM(bot);
         });
 
         this._controller.on(["direct_message","mention","direct_mention"], (bot,message) => {
@@ -90,7 +90,6 @@ export class OctoChainsawBot {
                 bot.reply(message,'I heard you loud and clear boss.');
             });
         });
-
 
         this._controller.storage.teams.all(function(err,teams) {
             if (err) {
