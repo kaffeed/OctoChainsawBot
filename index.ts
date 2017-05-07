@@ -24,3 +24,5 @@ if (!process.env.port) {
 console.log("Starting OctoChainsawBot...")
 
 var bot = new OctoChainsawBot(process.env.slackClientId, process.env.slackClientSecret, process.env.port, process.env.mittagApiToken);
+
+bot.start();

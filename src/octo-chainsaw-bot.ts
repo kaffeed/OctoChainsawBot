@@ -5,23 +5,13 @@ import { Menu, MittagApiResult } from './interfaces/mittag-api-result';
 var Botkit = require("botkit");
 var fs = require('fs');
 
-var startRTM = function(bot) {
-    bot.startRTM(function(err,bot,payload) {
-        if (err) {
-            console.log('*** Failed to start RTM')
-            return setTimeout(() => startRTM(bot), 60000);
-        }
-        console.log("*** RTM started!");
-    });
-}
-
-
 export class OctoChainsawBot {
     private _controller: any;
     private _mittagService: MittagService;
     private _menus: MittagApiResult;
     private _today: Date;
     private _bots: {} = {};
+    private _port: string;
 
     private trackBot(bot) {
         this._bots[bot.config.token] = bot;
@@ -39,18 +29,21 @@ export class OctoChainsawBot {
             clientSecret: slackClientSecret,
             scopes: ['bot']
         });
- 
-        this.initControllers(port);
 
-        this._mittagService = new MittagService(mittagApiKey);
+        this._port = port;
 
         this.initDefaultBehavior();
+        this._mittagService = new MittagService(mittagApiKey);
     }
 
-    private initControllers(port) {
-         this._controller.setupWebserver(port, (err,webserver)=> {
+    public start() {
+        this.initControllers();
+    }
+
+    private initControllers() {
+         this._controller.setupWebserver(this._port, (err,webserver)=> {
             this._controller.createWebhookEndpoints(this._controller.webserver);
-            
+
             this._controller.createOauthEndpoints(this._controller.webserver, (err,req,res) => {
                 if (err) {
                     res.status(500).send("ERROR: " + err);
@@ -66,7 +59,12 @@ export class OctoChainsawBot {
             if (this._bots[bot.config.token]) {
                 //do nothing
             } else {
-                startRTM(bot);
+                bot.startRTM(function(err,bot,payload) {
+                    if (err) {
+                        console.log('*** Failed to start RTM')
+                    }
+                    console.log("*** RTM started!");
+                });
             }
         });
 
@@ -77,7 +75,6 @@ export class OctoChainsawBot {
         this._controller.on("rtm_close", (bot) => {
             console.log("*** RTM api disconnected!");
             console.log("*** Trying to reconnect bot!");
-            startRTM(bot);
         });
 
         this._controller.on(["direct_message","mention","direct_mention"], (bot,message) => {
@@ -99,6 +96,7 @@ export class OctoChainsawBot {
             // connect all teams with bots up to slack!
             for (var t in teams) {
                 if (teams[t].bot) {
+                    teams[t].retry = Infinity;
                     this._controller.spawn(teams[t]).startRTM(function(err, bot) {
                         if (err) {
                             console.log('Error connecting bot to Slack:',err);
