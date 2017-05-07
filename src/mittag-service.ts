@@ -1,14 +1,17 @@
 import { IMittagService, IReadOnlyService } from './interfaces/services';
-import {Menu, MittagApiResult} from './interfaces/mittag-api-result';
+import { MittagApiResult, Menu} from './interfaces/mittag-api-result';
 import * as Promise from "promise";
 import { FormatUtility } from './format-utility';
 import * as http from 'http';
- 
-export class MittagService implements IMittagService<Menu> {
+import { BaseService } from "./base-service";
+import { inject } from "aurelia-dependency-injection/dist/aurelia-dependency-injection";
+import { OctoChainsawSettings } from "./octo-chainsaw-settings";
 
-    private cachedResult: MittagApiResult;
-    private lastFetched: Date;
-    private formatter: FormatUtility;
+@inject(FormatUtility, OctoChainsawSettings)
+export class MittagService extends BaseService<MittagApiResult> implements IMittagService<Menu> {
+
+    private _cachedResult: any;
+    private _lastFetched: Date;
 
     private defaultRestaurants: Array<number> = [
         371091, // horst
@@ -18,24 +21,25 @@ export class MittagService implements IMittagService<Menu> {
         42486   //lackinger
         ];
 
-    constructor(private mittagApiKey: string) {
-        console.log(`Mittag-Api key: ${mittagApiKey}`);
-        this.formatter = new FormatUtility();
+    constructor(private _settings: OctoChainsawSettings, private _formatter: FormatUtility)  {
+        super(_settings.mittagApiKey);
+        console.log(`*** Mittag-Api key: ${this._settings.mittagApiKey}`);
+        this._formatter = new FormatUtility();
 
-        this.fetchAll().then(x => {
-            this.cachedResult = x;
-            this.lastFetched = new Date();
+        this.fetchAll().then((x: MittagApiResult)=> {
+            this._cachedResult = x;
+            this._lastFetched = new Date();
         })
     }
 
     private menuCached() : boolean {
-        return (this.cachedResult && this.formatter.FormatDate(this.lastFetched) === this.formatter.FormatDate(new Date()));
+        return (this._cachedResult && this._formatter.FormatDate(this._lastFetched) === this._formatter.FormatDate(new Date()));
     }
 
     public fetchDefaults() : Promise<Array<Menu>> {
         return new Promise((resolve, reject) => {
             if (this.menuCached()) {
-                resolve(this.cachedResult.menus.filter(x => this.defaultRestaurants.indexOf(x.restaurant.id) != -1));
+                resolve(this._cachedResult.menus.filter(x => this.defaultRestaurants.indexOf(x.restaurant.id) != -1));
             } else {
                 this.fetchAll().then(x => {
                     resolve(x.menus.filter(y => this.defaultRestaurants.indexOf(y.restaurant.id) != -1));
@@ -44,33 +48,13 @@ export class MittagService implements IMittagService<Menu> {
         });
     }
 
-    public fetchAll() : Promise<MittagApiResult> {
-        return new Promise((resolve,reject) => {
-            http.get(this.mittagApiUrl, function(result) {  
-                console.log("Result", result);
-                var response = "";
-                result.on('data', function(chunk){
-                    response += chunk;
-                });
-
-                result.on('end', function(){
-                    var endresponse = <MittagApiResult> (JSON.parse(response));       
-                    console.log("Got a response: ", endresponse);
-                    this.cachedResult = endresponse;
-                    this.lastFetched = new Date();
-                    return resolve(endresponse)
-                });
-            });
-        });
-    }
-
     public get Result() : MittagApiResult {
-        if (this.cachedResult && this.formatter.FormatDate(this.lastFetched) == this.formatter.FormatDate(new Date())) {
-            return this.cachedResult;
+        if (this._cachedResult && this._formatter.FormatDate(this._lastFetched) == this._formatter.FormatDate(new Date())) {
+            return this._cachedResult;
         }
     }
 
     private get mittagApiUrl() : string {
-        return `http://www.mittag.at/api/1/menus?lat=48.3123164&lon=14.298357&apikey=${this.mittagApiKey}&v=1.0`;
+        return `${this._apiEndpoint}${this._settings.mittagApiKey}`;
     }
 }

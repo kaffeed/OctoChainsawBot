@@ -1,6 +1,6 @@
 import { MittagService } from './src/mittag-service';
 import { OctoChainsawBot } from './src/octo-chainsaw-bot';
-
+import { Container } from "aurelia-dependency-injection";
 if (!process.env.slackClientId) {
     console.log("Error, no clientId specified!");
     process.exit(1);
@@ -23,6 +23,8 @@ if (!process.env.port) {
 
 console.log("Starting OctoChainsawBot...")
 
-var bot = new OctoChainsawBot(process.env.slackClientId, process.env.slackClientSecret, process.env.port, process.env.mittagApiToken);
+let container = Container.instance;
+
+var bot = container.get(OctoChainsawBot);
 
 bot.start();

@@ -2,13 +2,14 @@ import { FormatUtility } from './format-utility';
 import { IReadOnlyService } from './interfaces/services';
 import { MittagService } from './mittag-service';
 import { Menu, MittagApiResult } from './interfaces/mittag-api-result';
+import { inject } from "aurelia-dependency-injection/dist/aurelia-dependency-injection";
+import { OctoChainsawSettings } from "./octo-chainsaw-settings";
 var Botkit = require("botkit");
 var fs = require('fs');
 
+@inject(OctoChainsawSettings, MittagService)
 export class OctoChainsawBot {
     private _controller: any;
-    private _mittagService: MittagService;
-    private _menus: MittagApiResult;
     private _today: Date;
     private _bots: {} = {};
     private _port: string;
@@ -17,7 +18,7 @@ export class OctoChainsawBot {
         this._bots[bot.config.token] = bot;
     }
 
-    constructor(slackClientId: string, slackClientSecret: string, port: string, mittagApiKey: string) {
+    constructor(private _settings: OctoChainsawSettings, private _mittagService: MittagService) {
         this._controller = Botkit.slackbot({
             debug: false,
             json_file_store: './bot_data/',
@@ -25,19 +26,37 @@ export class OctoChainsawBot {
         });
 
         this._controller.configureSlackApp({
-            clientId: slackClientId,
-            clientSecret: slackClientSecret,
+            clientId: _settings.slackClientId,
+            clientSecret: _settings.slackClientSecret,
             scopes: ['bot']
         });
 
-        this._port = port;
+        this._port = _settings.port;
 
         this.initDefaultBehavior();
-        this._mittagService = new MittagService(mittagApiKey);
+        this.initControllers();
     }
 
     public start() {
-        this.initControllers();
+        this._controller.storage.teams.all(function(err,teams) {
+            if (err) {
+                throw new Error(err);
+            }
+
+            // connect all teams with bots up to slack!
+            for (var t in teams) {
+                if (teams[t].bot) {
+                    teams[t].retry = Infinity;
+                    this._controller.spawn(teams[t]).startRTM(function(err, bot) {
+                        if (err) {
+                            console.log('Error connecting bot to Slack:',err);
+                        } else {
+                            this.trackBot(bot);
+                        }
+                    });
+                }
+            }
+        });
     }
 
     private initControllers() {
@@ -82,31 +101,12 @@ export class OctoChainsawBot {
                 timestamp: message.ts,
                 channel: message.channel,
                 name: 'robot_face',
-            },function(err) {
+            }, function(err) {
                 if (err) { console.log(err) }
                 bot.reply(message,'I heard you loud and clear boss.');
             });
         });
 
-        this._controller.storage.teams.all(function(err,teams) {
-            if (err) {
-                throw new Error(err);
-            }
-
-            // connect all teams with bots up to slack!
-            for (var t in teams) {
-                if (teams[t].bot) {
-                    teams[t].retry = Infinity;
-                    this._controller.spawn(teams[t]).startRTM(function(err, bot) {
-                        if (err) {
-                            console.log('Error connecting bot to Slack:',err);
-                        } else {
-                            this.trackBot(bot);
-                        }
-                    });
-                }
-            }
-        });
     }
 
     private initDefaultBehavior() {
@@ -130,7 +130,7 @@ export class OctoChainsawBot {
                 });
                 bot.reply(message, reply);
                 bot.reply(message, { text: "powered by *www.mittag.at*" });
-            })
+            });
         });
     }
 }
